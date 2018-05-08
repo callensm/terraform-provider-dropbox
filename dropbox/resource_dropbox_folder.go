@@ -21,7 +21,7 @@ func resourceDropboxFolder() *schema.Resource {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
-			"id": &schema.Schema{
+			"folder_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -67,7 +67,7 @@ func resourceDropboxFolderRead(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		d.Set("path", path)
 	}
-	d.Set("id", folder.(*files.FolderMetadata).Id)
+	d.Set("folder_id", folder.(*files.FolderMetadata).Id)
 	d.Set("name", folder.(*files.FolderMetadata).Name)
 	return nil
 }

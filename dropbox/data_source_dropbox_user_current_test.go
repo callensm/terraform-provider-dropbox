@@ -6,22 +6,19 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccDropboxPaperFolder(t *testing.T) {
+func TestAccDropboxUserCurrent(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDropboxPaperFolderDataConfig,
+				Config: testAccDropboxUserCurrentDataConfig,
 				Check:  resource.ComposeTestCheckFunc(),
 			},
 		},
 	})
 }
 
-// TODO: Insert real document ID
-const testAccDropboxPaperFolderDataConfig = `
-data "dropbox_paper_folder" "foo" {
-	doc_id = "abc1234"
-}
+const testAccDropboxUserCurrentDataConfig = `
+data "dropbox_user_current" "user" {}
 `
