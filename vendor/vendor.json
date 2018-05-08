@@ -219,6 +219,12 @@
 			"revisionTime": "2018-03-05T13:03:54Z"
 		},
 		{
+			"checksumSHA1": "CSPbwbyzqA6sfORicn4HFtIhF/c=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "8991bc29aa16c548c550c7ff78260e27b9ab7c73",
+			"revisionTime": "2018-02-21T22:46:20Z"
+		},
+		{
 			"checksumSHA1": "WG+axYHQyDrUry7PFEhudmexlLc=",
 			"path": "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox",
 			"revision": "cdadcb6ae1700b7ab0995834469dea83e74a2969",
@@ -507,6 +513,12 @@
 			"revisionTime": "2017-02-13T18:49:38Z"
 		},
 		{
+			"checksumSHA1": "vt+P9D2yWDO3gdvdgCzwqunlhxU=",
+			"path": "github.com/hashicorp/logutils",
+			"revision": "0dc08b1671f34c4250ce212759ebd880f743d883",
+			"revisionTime": "2015-06-09T07:04:31Z"
+		},
+		{
 			"checksumSHA1": "D2qVXjDywJu6wLj/4NCTsFnRrvw=",
 			"path": "github.com/hashicorp/terraform/config",
 			"revision": "0cc9e050ecd4a46ba6448758c2edc0b29bef5695",
@@ -543,6 +555,12 @@
 			"revisionTime": "2018-05-03T10:44:00Z"
 		},
 		{
+			"checksumSHA1": "uT6Q9RdSRAkDjyUgQlJ2XKJRab4=",
+			"path": "github.com/hashicorp/terraform/helper/config",
+			"revision": "0cc9e050ecd4a46ba6448758c2edc0b29bef5695",
+			"revisionTime": "2018-05-03T10:44:00Z"
+		},
+		{
 			"checksumSHA1": "KNvbU1r5jv0CBeQLnEtDoL3dRtc=",
 			"path": "github.com/hashicorp/terraform/helper/hashcode",
 			"revision": "0cc9e050ecd4a46ba6448758c2edc0b29bef5695",
@@ -551,6 +569,18 @@
 		{
 			"checksumSHA1": "B267stWNQd0/pBTXHfI/tJsxzfc=",
 			"path": "github.com/hashicorp/terraform/helper/hilmapstructure",
+			"revision": "0cc9e050ecd4a46ba6448758c2edc0b29bef5695",
+			"revisionTime": "2018-05-03T10:44:00Z"
+		},
+		{
+			"checksumSHA1": "BAXV9ruAyno3aFgwYI2/wWzB2Gc=",
+			"path": "github.com/hashicorp/terraform/helper/logging",
+			"revision": "0cc9e050ecd4a46ba6448758c2edc0b29bef5695",
+			"revisionTime": "2018-05-03T10:44:00Z"
+		},
+		{
+			"checksumSHA1": "ryCWu7RtMlYrAfSevaI7RtaXe98=",
+			"path": "github.com/hashicorp/terraform/helper/resource",
 			"revision": "0cc9e050ecd4a46ba6448758c2edc0b29bef5695",
 			"revisionTime": "2018-05-03T10:44:00Z"
 		},

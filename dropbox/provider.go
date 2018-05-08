@@ -19,11 +19,15 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 
-		ResourcesMap: map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"dropbox_paper_document": resourceDropboxPaperDoc(),
+			"dropbox_paper_folder":   resourceDropboxFolder(),
+		},
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"dropbox_user_current": dataSourceDropboxUserCurrent(),
 			"dropbox_space_usage":  dataSourceDropboxSpaceUsage(),
+			"dropbox_paper_folder": dataSourceDropboxPaperFolder(),
 		},
 
 		ConfigureFunc: providerConfigure,
