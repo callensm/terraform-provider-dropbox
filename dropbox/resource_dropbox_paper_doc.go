@@ -23,6 +23,7 @@ func resourceDropboxPaperDoc() *schema.Resource {
 			"parent_folder": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			"import_format": &schema.Schema{
 				Type:        schema.TypeString,
@@ -73,11 +74,10 @@ func resourceDropboxPaperDocCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	opts := &paper.PaperDocCreateArgs{ImportFormat: &tag}
-	if v, ok := d.GetOk("parent_folder"); ok {
-		opts.ParentFolderId = v.(string)
+	opts := &paper.PaperDocCreateArgs{
+		ImportFormat:   &tag,
+		ParentFolderId: d.Get("parent_folder").(string),
 	}
-
 	results, err := client.DocsCreate(opts, reader)
 	if err != nil {
 		return err
