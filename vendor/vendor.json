@@ -249,6 +249,24 @@
 			"revisionTime": "2018-04-22T01:06:13Z"
 		},
 		{
+			"checksumSHA1": "KSiHPzzf6i87HgIMNJFLwmgfQGk=",
+			"path": "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper",
+			"revision": "cdadcb6ae1700b7ab0995834469dea83e74a2969",
+			"revisionTime": "2018-04-22T01:06:13Z"
+		},
+		{
+			"checksumSHA1": "B1MVzpqWZCyizGfvlcQPi/aY530=",
+			"path": "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/seen_state",
+			"revision": "cdadcb6ae1700b7ab0995834469dea83e74a2969",
+			"revisionTime": "2018-04-22T01:06:13Z"
+		},
+		{
+			"checksumSHA1": "JyvnWrstebNmD8uekXv5Slb+wsc=",
+			"path": "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/sharing",
+			"revision": "cdadcb6ae1700b7ab0995834469dea83e74a2969",
+			"revisionTime": "2018-04-22T01:06:13Z"
+		},
+		{
 			"checksumSHA1": "pbif/bX3FJyB+kPpSCPoo0vJIDc=",
 			"path": "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/team_common",
 			"revision": "cdadcb6ae1700b7ab0995834469dea83e74a2969",
