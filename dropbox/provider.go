@@ -36,7 +36,7 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	cfg := &ProviderConfig{
-		DropboxConfig: &db.Config{Token: d.Get("token").(string)},
+		DropboxConfig: &db.Config{Token: d.Get("access_token").(string)},
 	}
 
 	return cfg, nil

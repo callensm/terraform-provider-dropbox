@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -24,7 +25,7 @@ func init() {
 		log.Fatalf("Initialization failure: Couldn't read access token file. %s", err)
 	}
 
-	err = os.Setenv("DROPBOX_TOKEN", string(token))
+	err = os.Setenv("DROPBOX_TOKEN", strings.Replace(string(token), "\n", "", 1))
 	if err != nil {
 		log.Fatalf("Initialization failure: Failed to set the DROPBOX_TOKEN env. %s", err)
 	}
