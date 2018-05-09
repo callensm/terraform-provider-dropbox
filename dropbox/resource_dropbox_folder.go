@@ -5,21 +5,26 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var foldPathPattern = "(/(.|[\r\n])*)|(ns:[0-9]+(/.*)?)"
+
 func resourceDropboxFolder() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDropboxFolderCreate,
 		Read:   resourceDropboxFolderRead,
-		Update: resourceDropboxFolderUpdate,
 		Delete: resourceDropboxFolderDelete,
 
 		Schema: map[string]*schema.Schema{
 			"path": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateWithRegExp(foldPathPattern),
 			},
 			"auto_rename": &schema.Schema{
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
 			},
 			"folder_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -69,20 +74,6 @@ func resourceDropboxFolderRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.Set("folder_id", folder.(*files.FolderMetadata).Id)
 	d.Set("name", folder.(*files.FolderMetadata).Name)
-	return nil
-}
-
-func resourceDropboxFolderUpdate(d *schema.ResourceData, meta interface{}) error {
-	// UNHIDE: config := meta.(*ProviderConfig).DropboxConfig
-	// UNHIDE: client := files.New(*config)
-
-	// TODO: Figure out how to modify path from SDK
-	// d.Partial(true)
-	// if d.HasChanged("path") {
-
-	// }
-	// d.Partial(false)
-
 	return nil
 }
 
