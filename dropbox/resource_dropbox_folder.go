@@ -1,11 +1,12 @@
 package dropbox
 
 import (
+	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/file_properties"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-var foldPathPattern = "(/(.|[\r\n])*)|(ns:[0-9]+(/.*)?)"
+var folderPathPattern = "(/(.|[\r\n])*)|(ns:[0-9]+(/.*)?)"
 
 func resourceDropboxFolder() *schema.Resource {
 	return &schema.Resource{
@@ -18,13 +19,12 @@ func resourceDropboxFolder() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateWithRegExp(foldPathPattern),
+				ValidateFunc: validateWithRegExp(folderPathPattern),
 			},
 			"auto_rename": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
-				ForceNew: true,
 			},
 			"folder_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -33,6 +33,13 @@ func resourceDropboxFolder() *schema.Resource {
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"property_group_templates": &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "List of template IDs corresponding to the associated folder property groups",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -53,6 +60,11 @@ func resourceDropboxFolderCreate(d *schema.ResourceData, meta interface{}) error
 
 	data := folder.Metadata
 	d.SetId(data.Id)
+
+	if data.PropertyGroups != nil {
+		d.Set("property_group_templates", flattenPropertyGroupIds(data.PropertyGroups))
+	}
+
 	return resourceDropboxFolderRead(d, meta)
 }
 
@@ -88,4 +100,12 @@ func resourceDropboxFolderDelete(d *schema.ResourceData, meta interface{}) error
 	}
 
 	return nil
+}
+
+func flattenPropertyGroupIds(groups []*file_properties.PropertyGroup) []string {
+	groupIds := make([]string, 0, len(groups))
+	for _, g := range groups {
+		groupIds = append(groupIds, g.TemplateId)
+	}
+	return groupIds
 }

@@ -19,17 +19,16 @@ func dataSourceDropboxPaperFolder() *schema.Resource {
 			"folders": &schema.Schema{
 				Type:        schema.TypeList,
 				Computed:    true,
-				Optional:    true,
 				Description: "List of folders that contain the document reference",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": &schema.Schema{
 							Type:     schema.TypeString,
-							Required: true,
+							Computed: true,
 						},
 						"name": &schema.Schema{
 							Type:     schema.TypeString,
-							Required: true,
+							Computed: true,
 						},
 					},
 				},
@@ -45,22 +44,23 @@ func dataSourceDropboxPaperFolderRead(d *schema.ResourceData, meta interface{}) 
 	opts := paper.NewRefPaperDoc(d.Get("doc_id").(string))
 	info, err := client.DocsGetFolderInfo(opts)
 	if err != nil {
-		return err
+		return fmt.Errorf("Paper Folder Data Failure: %s", err)
 	}
 
-	var outputFolders []map[string]interface{}
-	if folders := info.Folders; folders != nil {
-		outputFolders = make([]map[string]interface{}, len(folders))
-		for _, f := range folders {
-			newFolder := make(map[string]interface{})
-			newFolder["id"] = f.Id
-			newFolder["name"] = f.Name
-			outputFolders = append(outputFolders, newFolder)
-		}
-	}
-
-	d.SetId(fmt.Sprintf("read:%s", d.Get("doc_id").(string)))
+	outputFolders := flattenPaperFolders(info.Folders)
+	d.SetId(fmt.Sprintf("folder_ds:%s", d.Get("doc_id").(string)))
 	d.Set("folders", outputFolders)
 
 	return nil
+}
+
+func flattenPaperFolders(folders []*paper.Folder) []map[string]interface{} {
+	outputFolders := make([]map[string]interface{}, 0, len(folders))
+	for _, f := range folders {
+		newFolder := make(map[string]interface{})
+		newFolder["id"] = f.Id
+		newFolder["name"] = f.Name
+		outputFolders = append(outputFolders, newFolder)
+	}
+	return outputFolders
 }

@@ -20,3 +20,19 @@ func validateWithRegExp(pattern string) schema.SchemaValidateFunc {
 		return
 	}
 }
+
+func validateDocImportFormat() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		format := v.(string)
+		validFormats := []string{"html", "markdown", "plain_text", "other"}
+
+		for _, f := range validFormats {
+			if f == format {
+				return
+			}
+		}
+
+		errors = append(errors, fmt.Errorf("Import Format Validation Failure: %s is not a valid import format", format))
+		return
+	}
+}

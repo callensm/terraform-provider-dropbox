@@ -16,8 +16,8 @@ func dataSourceDropboxSpaceUsage() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"allocation": &schema.Schema{
-				Type:     schema.TypeMap,
+			"allocated": &schema.Schema{
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"is_team_allocation": &schema.Schema{
@@ -37,18 +37,21 @@ func dataSourceDropboxSpaceUsageRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	var allocated uint64
+	used := usage.Used
 	isTeam := false
-	if indiv := usage.Allocation.Individual; indiv != nil {
-		allocated = indiv.Allocated
+
+	var allocated uint64
+	if tag := usage.Allocation.Tag; tag == "individual" {
+		allocated = usage.Allocation.Individual.Allocated
 	} else {
 		isTeam = true
+		used = usage.Allocation.Team.Used
 		allocated = usage.Allocation.Team.Allocated
 	}
 
-	d.SetId(fmt.Sprintf("%d:%v", usage.Used, usage.Allocation))
+	d.SetId(fmt.Sprintf("%d:%d", used, allocated))
 	d.Set("used", usage.Used)
-	d.Set("allocation", allocated)
+	d.Set("allocated", allocated)
 	d.Set("is_team_allocation", isTeam)
 	return nil
 }

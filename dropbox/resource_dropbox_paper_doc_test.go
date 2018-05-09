@@ -33,15 +33,14 @@ func TestAccDropboxPaperDoc_foldered(t *testing.T) {
 }
 
 const testAccDropboxPaperDocConfig = `
-resource "dropbox_paper_document" "doc" {
+resource "dropbox_paper_doc" "doc" {
 	content_file  = "${file("../token.txt")}"
 	import_format = "plain_text"
 }
 `
 
-// TODO: Input valid parent folder ID
 const testAccDropboxPaperDocFolderConfig = `
-resource "dropbox_paper_document" "foldered_doc" {
+resource "dropbox_paper_doc" "foldered_doc" {
 	content_file  = "${file("../token.txt")}"
 	parent_folder = ""
 	import_format = "plain_text"

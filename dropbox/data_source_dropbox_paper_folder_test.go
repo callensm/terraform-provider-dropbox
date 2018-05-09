@@ -2,6 +2,7 @@ package dropbox
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -34,11 +35,10 @@ func testAccPaperFolderExists(name string) resource.TestCheckFunc {
 			return fmt.Errorf("Paper Folder Failure: ID is not set")
 		}
 
-		if num := len(rs.Primary.Attributes["folders"]); num != 1 {
-			return fmt.Errorf("Paper Folder Failure: Should find 1 folder but instead found %d", num)
+		if num, _ := strconv.Atoi(rs.Primary.Attributes["folders.#"]); num < 1 {
+			return fmt.Errorf("Paper Folder Failure: Should find at least 1 folder but instead found %d", num)
 		}
 
-		fmt.Printf("Folder Data: %+v\n", rs.Primary.Attributes["folders"])
 		return nil
 	}
 }

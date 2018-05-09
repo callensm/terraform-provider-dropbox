@@ -1,6 +1,7 @@
 package dropbox
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 
@@ -17,8 +18,9 @@ func resourceDropboxPaperDoc() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"content_file": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:      schema.TypeString,
+				Required:  true,
+				StateFunc: convertDocContentToB64(),
 			},
 			"parent_folder": &schema.Schema{
 				Type:     schema.TypeString,
@@ -26,9 +28,10 @@ func resourceDropboxPaperDoc() *schema.Resource {
 				Default:  "",
 			},
 			"import_format": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Valid formats include: html, markdown, plain_text, other",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Valid formats include: html, markdown, plain_text, other",
+				ValidateFunc: validateDocImportFormat(),
 			},
 			"doc_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -125,13 +128,21 @@ func resourceDropboxPaperDocUpdate(d *schema.ResourceData, meta interface{}) err
 	// config := meta.(*ProviderConfig).DropboxConfig
 	// client := paper.New(*config)
 
-	// opts := &paper.PaperDocUpdateArgs{
-	// 	RefPaperDoc:  *paper.NewRefPaperDoc(d.Id()),
-	// 	Revision:     d.Get("revision").(int64),
-	// 	ImportFormat: d.Get("import_format").(*paper.ImportFormat),
-	// }
+	// var format *paper.ImportFormat
+	// format.Tag = d.Get("import_format").(string)
 
-	// TODO: Figure out updating Paper documents with different types
+	// var policy *paper.PaperDocUpdatePolicy
+	// policy.Tag = "overwrite_all"
+
+	// opts := &paper.PaperDocUpdateArgs{
+	// 	RefPaperDoc:     *paper.NewRefPaperDoc(d.Id()),
+	// 	Revision:        d.Get("revision").(int64),
+	// 	ImportFormat:    format,
+	// 	DocUpdatePolicy: policy,
+	// }
+	// result, err := client.DocsUpdate(opts, nil)
+
+	// TODO: Implement state usage for file contents changing
 
 	return nil
 }
@@ -143,4 +154,11 @@ func resourceDropboxPaperDocDelete(d *schema.ResourceData, meta interface{}) err
 	opts := paper.NewRefPaperDoc(d.Id())
 	err := client.DocsArchive(opts)
 	return err
+}
+
+func convertDocContentToB64() schema.SchemaStateFunc {
+	return func(data interface{}) string {
+		content := data.(string)
+		return base64.StdEncoding.EncodeToString([]byte(content))
+	}
 }

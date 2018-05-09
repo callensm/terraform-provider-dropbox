@@ -14,6 +14,10 @@ func dataSourceDropboxUserCurrent() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"account_type": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"display_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -37,6 +41,7 @@ func dataSourceDropboxUserCurrentRead(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId(account.AccountId)
 	d.Set("account_id", account.AccountId)
+	d.Set("account_type", account.AccountType.Tag)
 	d.Set("display_name", account.Name.DisplayName)
 	d.Set("email", account.Email)
 	return nil

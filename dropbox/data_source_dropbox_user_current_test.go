@@ -23,6 +23,21 @@ func TestAccDropboxUserCurrent(t *testing.T) {
 	})
 }
 
+func TestAccDropboxUserCurrent_type(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccDropboxUserCurrentDataConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.dropbox_user_current.user", "account_type", "basic"),
+				),
+			},
+		},
+	})
+}
+
 func testAccUserCurrentExists(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[name]
