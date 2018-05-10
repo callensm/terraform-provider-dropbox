@@ -1,9 +1,8 @@
 package dropbox
 
 import (
-	"encoding/base64"
 	"fmt"
-	"os"
+	"strings"
 
 	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
@@ -18,10 +17,13 @@ func resourceDropboxPaperDoc() *schema.Resource {
 		Delete: resourceDropboxPaperDocDelete,
 
 		Schema: map[string]*schema.Schema{
+			"name": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"content_file": &schema.Schema{
-				Type:      schema.TypeString,
-				Required:  true,
-				StateFunc: convertDocContentToB64(),
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"parent_folder": &schema.Schema{
 				Type:     schema.TypeString,
@@ -69,11 +71,9 @@ func resourceDropboxPaperDocCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Doc Creation Failure: Invalid import format given for paper document creation: %s", format)
 	}
 
-	contentFile := d.Get("content_file").(string)
-	reader, err := os.Open(contentFile)
-	if err != nil {
-		return err
-	}
+	name := d.Get("name").(string)
+	content := d.Get("content_file").(string)
+	reader := strings.NewReader(fmt.Sprintf("%s\n%s", name, content))
 
 	opts := &paper.PaperDocCreateArgs{
 		ImportFormat:   &tag,
@@ -81,7 +81,7 @@ func resourceDropboxPaperDocCreate(d *schema.ResourceData, meta interface{}) err
 	}
 	results, err := client.DocsCreate(opts, reader)
 	if err != nil {
-		return err
+		return fmt.Errorf("Paper Doc Failure: %s", err)
 	}
 
 	d.SetId(results.DocId)
@@ -152,11 +152,4 @@ func resourceDropboxPaperDocDelete(d *schema.ResourceData, meta interface{}) err
 	opts := paper.NewRefPaperDoc(d.Id())
 	err := client.DocsArchive(opts)
 	return err
-}
-
-func convertDocContentToB64() schema.SchemaStateFunc {
-	return func(data interface{}) string {
-		content := data.(string)
-		return base64.StdEncoding.EncodeToString([]byte(content))
-	}
 }

@@ -43,6 +43,7 @@ Management and file content uploading for the creation of Paper documents in Dro
 # Creates a new Paper document called 'myfile.json' in the /data folder
 # containing the contents are the local 'myfile.json' file.
 resource "dropbox_paper_doc" "doc" {
+  name          = "Example"
   content_file  = "myfile.json"
   parent_folder = "/data"
   import_format = "plain_text"
@@ -51,6 +52,7 @@ resource "dropbox_paper_doc" "doc" {
 
 ### Argument Reference
 
+* **name** - (Required) _Name/title of the document being created_
 * **content_file** - (Required) _The file that is to be read and uploaded to Dropbox Paper as a new document_
 * **parent_folder** - (Optional) _The folder that the new file should be placed inside of. Defaults to the top level directory (no folder)_
 * **import_format** - (Required) \_The format of that data that you are uploading into the document. Value must be of the following: `html`, `markdown`, `plain_text`, or `other`.
@@ -70,6 +72,7 @@ Resource for adding accounts to a Dropbox Paper document, or sharing the documen
 
 ```hcl
 resource "dropbox_paper_doc" "doc" {
+  name          = "Example"
   content_file  = "myfile.json"
   import_format = "plain_text"
 }
@@ -112,6 +115,7 @@ Set sharing policies for public and team use for a Dropbox Paper document.
 
 ```hcl
 resource "dropbox_paper_doc" "doc" {
+  name          = "Example"
   content_file  = "myfile.json"
   import_format = "plain_text"
 }
