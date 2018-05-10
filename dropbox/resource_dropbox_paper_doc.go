@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -60,15 +61,12 @@ func resourceDropboxPaperDocCreate(d *schema.ResourceData, meta interface{}) err
 	var tag paper.ImportFormat
 	switch format := d.Get("import_format").(string); format {
 	case "html":
-		tag.Tag = paper.ImportFormatHtml
 	case "markdown":
-		tag.Tag = paper.ImportFormatMarkdown
 	case "plain_text":
-		tag.Tag = paper.ImportFormatPlainText
 	case "other":
-		tag.Tag = paper.ImportFormatOther
+		tag = paper.ImportFormat{Tagged: db.Tagged{Tag: format}}
 	default:
-		return fmt.Errorf("Invalid import format given for paper document creation: %s", format)
+		return fmt.Errorf("Doc Creation Failure: Invalid import format given for paper document creation: %s", format)
 	}
 
 	contentFile := d.Get("content_file").(string)

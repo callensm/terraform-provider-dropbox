@@ -25,6 +25,7 @@ func resourceDropboxFolder() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+				ForceNew: true,
 			},
 			"folder_id": &schema.Schema{
 				Type:     schema.TypeString,
