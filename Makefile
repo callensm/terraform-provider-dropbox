@@ -3,7 +3,7 @@ PKG_NAME=dropbox
 default: clean build move
 
 build:
-	go intall #go build -o terraform-provider-$(PKG_NAME)
+	go install #go build -o terraform-provider-$(PKG_NAME)
 
 move:
 	mv terraform-provider-$(PKG_NAME) ~/.terraform.d/plugins/darwin_amd64/
