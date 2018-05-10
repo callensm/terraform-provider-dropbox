@@ -67,9 +67,9 @@ output "num_folders" {
 
 ### Argument Reference
 
-* **doc_id** - _The unique ID for the Paper document you are search for_
+* **doc_id** - (Required) _The unique ID for the Paper document you are search for_
 
-### Attribute Reference
+### Attributes Reference
 
 * **folders** - _List of folders associated with Paper document. May be empty_
   * **id** - _Unique ID for the folder instance at an index_
@@ -93,9 +93,9 @@ output "doc_public" {
 
 ### Argument Reference
 
-* **doc_id** - _The unique ID for the Paper document you are search for_
+* **doc_id** - (Required) _The unique ID for the Paper document you are search for_
 
-### Attribute Reference
+### Attributes Reference
 
 * **public_policy** - _The policy attached to the document for public use_
 * **team_policy** - _The policy attached to the document for team use_
