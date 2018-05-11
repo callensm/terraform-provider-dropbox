@@ -3,7 +3,7 @@ package dropbox
 import (
 	"encoding/base64"
 	"fmt"
-	"os"
+	"strings"
 
 	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
@@ -18,10 +18,10 @@ func resourceDropboxPaperDoc() *schema.Resource {
 		Delete: resourceDropboxPaperDocDelete,
 
 		Schema: map[string]*schema.Schema{
-			"content_file": &schema.Schema{
+			"content": &schema.Schema{
 				Type:      schema.TypeString,
 				Required:  true,
-				StateFunc: convertDocContentToB64(),
+				StateFunc: convertContentToB64(),
 			},
 			"parent_folder": &schema.Schema{
 				Type:     schema.TypeString,
@@ -50,15 +50,13 @@ func resourceDropboxPaperDoc() *schema.Resource {
 	}
 }
 
+// TODO: Retest after switching to ${file("...")} input
 func resourceDropboxPaperDocCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*ProviderConfig).DropboxConfig
 	client := paper.New(*config)
 
-	file := d.Get("content_file").(string)
-	reader, err := os.Open(file)
-	if err != nil {
-		return fmt.Errorf("Doc Creation Failure: %s", err)
-	}
+	content := d.Get("content").(string)
+	reader := strings.NewReader(content)
 
 	opts := &paper.PaperDocCreateArgs{
 		ImportFormat:   &paper.ImportFormat{Tagged: db.Tagged{Tag: d.Get("import_format").(string)}},
@@ -141,7 +139,7 @@ func resourceDropboxPaperDocDelete(d *schema.ResourceData, meta interface{}) err
 	return err
 }
 
-func convertDocContentToB64() schema.SchemaStateFunc {
+func convertContentToB64() schema.SchemaStateFunc {
 	return func(data interface{}) string {
 		content := data.(string)
 		return base64.StdEncoding.EncodeToString([]byte(content))

@@ -21,6 +21,7 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
+			"dropbox_file":                 resourceDropboxFile(),
 			"dropbox_folder":               resourceDropboxFolder(),
 			"dropbox_paper_doc":            resourceDropboxPaperDoc(),
 			"dropbox_paper_doc_users":      resourceDropboxPaperDocUsers(),

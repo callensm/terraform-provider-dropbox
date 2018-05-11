@@ -79,3 +79,19 @@ func validateDocPolicyType(env string) schema.SchemaValidateFunc {
 		return
 	}
 }
+
+func validateFileWriteMode() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		mode := v.(string)
+		valid := []string{"add", "overwrite", "update"}
+
+		for _, v := range valid {
+			if mode == v {
+				return
+			}
+		}
+
+		errors = append(errors, fmt.Errorf("Write Mode Validation Failure: %s is not a valid write mode", mode))
+		return
+	}
+}
