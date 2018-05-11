@@ -39,6 +39,7 @@ func resourceDropboxPaperDocUsers() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      "view_and_comment",
+							Description:  "Value must be either `edit` or `view_and_comment`",
 							ValidateFunc: validateDocUserPermissionsType(),
 						},
 					},
