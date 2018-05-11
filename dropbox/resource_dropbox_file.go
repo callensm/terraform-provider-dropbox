@@ -20,6 +20,7 @@ func resourceDropboxFile() *schema.Resource {
 			"content": &schema.Schema{
 				Type:      schema.TypeString,
 				Required:  true,
+				ForceNew:  true,
 				StateFunc: convertContentToB64(),
 			},
 			"path": &schema.Schema{
@@ -77,16 +78,49 @@ func resourceDropboxFileCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(metadata.Id)
-	d.Set("hash", metadata.ContentHash)
-	d.Set("size", metadata.Size)
-	return nil
+	return resourceDropboxFileRead(d, meta)
 }
 
 func resourceDropboxFileRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := files.New(*config)
+
+	opts := files.NewDownloadArg(d.Get("path").(string))
+	res, _, err := client.Download(opts)
+	if err != nil {
+		return fmt.Errorf("File Read Failure: %s", err)
+	}
+
+	d.Set("hash", res.ContentHash)
+	d.Set("size", res.Size)
 	return nil
 }
 
 func resourceDropboxFileUpdate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := files.New(*config)
+
+	optsRead := files.NewGetMetadataArg(d.Id())
+	res, err := client.GetMetadata(optsRead)
+	if err != nil {
+		return fmt.Errorf("File Update Failure: %s", err)
+	}
+	oldPath := res.(*files.FileMetadata).PathDisplay
+
+	d.Partial(true)
+	if d.HasChange("path") {
+		optsMove := &files.RelocationArg{
+			RelocationPath: *files.NewRelocationPath(oldPath, d.Get("path").(string)),
+		}
+		_, err := client.MoveV2(optsMove)
+		if err != nil {
+			return fmt.Errorf("File Update Failure: %s", err)
+		}
+
+		d.SetPartial("path")
+	}
+	d.Partial(false)
+
 	return nil
 }
 
