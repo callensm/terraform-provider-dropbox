@@ -60,7 +60,6 @@ resource "dropbox_paper_doc" "doc" {
 * **doc_id** - _The unique identifier for the newly created Paper document_
 * **revision** - _An integer value representing the current revision number of the document_
 * **title** - _The name/title of the new document_
-* **owner** - _The name or email address of the owner account for the new document_
 
 ## **dropbox_paper_doc_users**
 
