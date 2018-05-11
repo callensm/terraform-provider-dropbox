@@ -38,12 +38,35 @@ output "file_hash" {
 ### Example Usage
 
 ```hcl
+resource "dropbox_file" "test" {
+  content       = "${file("myfile.txt")}"
+  path          = "/myfile.txt"
+  import_format = "plain_text"
+}
 
+resource "dropbox_file_members" "mems" {
+  file_id = "${dropbox_file.test.id}"
+  members = [
+    {
+      email = "user@example.com"
+    }
+  ]
+}
 ```
 
 ### Argument Reference
 
+* **file_id** - (Required) _The unique identifier for the Dropbox file you are adding the new members to_
+* **members** - (Required) _List of Dropbox users/accounts that are to be give file access. `email` and `account_id` are conflicting fields so only give one per member_
+  * **email** - (Optional) _Associated email address for the member being added_
+  * **account_id** - (Optional) _The Dropbox account identifier for the member being added_
+* **message** - (Optional) _A custom message to be emailed to the added member(s) when they are notified of their new file access_
+* **quiet** - (Optional) _Boolean value to specific whether newly added members will be notified of their new file access. Defaults to `false` if no value is given, meaning they will be notified_
+* **access_level** - (Optional) _The access level tier that is to be granted to all members in specified in the `members` input. Values can be either: `owner`, `editor`, `viewer`, or `viewer_no_comment`._
+
 ### Attributes Reference
+
+There are no additional attributes that are received from the creation of this resource.
 
 ## **dropbox_folder**
 

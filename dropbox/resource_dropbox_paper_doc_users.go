@@ -99,7 +99,6 @@ func resourceDropboxPaperDocUserCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	d.SetId(fmt.Sprintf("%s:%d", d.Get("doc_id").(string), len(opts.Members)))
-
 	return resourceDropboxPaperDocUserRead(d, meta)
 }
 
@@ -162,7 +161,7 @@ func resourceDropboxPaperDocUserDelete(d *schema.ResourceData, meta interface{})
 		RefPaperDoc: *paper.NewRefPaperDoc(d.Get("doc_id").(string)),
 	}
 
-	for _, member := range createListOfRemoveMembers(d.Get("members").([]map[string]interface{})) {
+	for _, member := range createListOfMembers(d.Get("members").([]map[string]interface{})) {
 		opts.Member = member
 		err := client.DocsUsersRemove(opts)
 		if err != nil {
@@ -171,23 +170,6 @@ func resourceDropboxPaperDocUserDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	return nil
-}
-
-func createListOfRemoveMembers(m []map[string]interface{}) []*sharing.MemberSelector {
-	members := make([]*sharing.MemberSelector, 0, len(m))
-	for _, i := range m {
-		var selector sharing.MemberSelector
-		if email := i["email"].(string); email != "" {
-			selector.Tag = "email"
-			selector.Email = email
-		} else {
-			selector.Tag = "dropbox_id"
-			selector.DropboxId = i["account_id"].(string)
-		}
-
-		members = append(members, &selector)
-	}
-	return members
 }
 
 func createListOfAddMembers(m []map[string]interface{}) []*paper.AddMember {
