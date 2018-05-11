@@ -50,7 +50,6 @@ func resourceDropboxPaperDoc() *schema.Resource {
 	}
 }
 
-// TODO: Retest after switching to ${file("...")} input
 func resourceDropboxPaperDocCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*ProviderConfig).DropboxConfig
 	client := paper.New(*config)
