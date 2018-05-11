@@ -24,9 +24,11 @@ func resourceDropboxPaperDoc() *schema.Resource {
 				StateFunc: convertContentToB64(),
 			},
 			"parent_folder": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "",
+				Description: "Unique identifier for the folder used as the destination",
 			},
 			"import_format": &schema.Schema{
 				Type:         schema.TypeString,
@@ -107,24 +109,32 @@ func resourceDropboxPaperDocRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceDropboxPaperDocUpdate(d *schema.ResourceData, meta interface{}) error {
-	// config := meta.(*ProviderConfig).DropboxConfig
-	// client := paper.New(*config)
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := paper.New(*config)
+	pid := d.Id()
 
-	// var format *paper.ImportFormat
-	// format.Tag = d.Get("import_format").(string)
+	content := d.Get("content").(string)
+	reader := strings.NewReader(content)
 
-	// var policy *paper.PaperDocUpdatePolicy
-	// policy.Tag = "overwrite_all"
+	d.Partial(true)
+	if d.HasChange("content") || d.HasChange("import_format") {
+		updateOpts := &paper.PaperDocUpdateArgs{
+			RefPaperDoc:     *paper.NewRefPaperDoc(pid),
+			DocUpdatePolicy: &paper.PaperDocUpdatePolicy{Tagged: db.Tagged{Tag: "overwrite_all"}},
+			Revision:        d.Get("revision").(int64),
+			ImportFormat:    &paper.ImportFormat{Tagged: db.Tagged{Tag: d.Get("import_format").(string)}},
+		}
 
-	// opts := &paper.PaperDocUpdateArgs{
-	// 	RefPaperDoc:     *paper.NewRefPaperDoc(d.Id()),
-	// 	Revision:        d.Get("revision").(int64),
-	// 	ImportFormat:    format,
-	// 	DocUpdatePolicy: policy,
-	// }
-	// result, err := client.DocsUpdate(opts, nil)
+		res, err := client.DocsUpdate(updateOpts, reader)
+		if err != nil {
+			return fmt.Errorf("Doc Update Failure: %s", err)
+		}
 
-	// TODO: Implement state usage for file contents changing
+		d.SetPartial("content")
+		d.SetPartial("import_format")
+		d.Set("revision", res.Revision)
+	}
+	d.Partial(false)
 
 	return nil
 }
