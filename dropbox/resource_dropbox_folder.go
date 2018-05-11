@@ -6,8 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-var folderPathPattern = "(/(.|[\r\n])*)|(ns:[0-9]+(/.*)?)"
-
 func resourceDropboxFolder() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDropboxFolderCreate,

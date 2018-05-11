@@ -3,6 +3,7 @@ package dropbox
 import (
 	"fmt"
 
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/sharing"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -29,6 +30,7 @@ func resourceDropboxPaperDocUsers() *schema.Resource {
 							Type:          schema.TypeString,
 							Optional:      true,
 							ConflictsWith: []string{"members.account_id"},
+							ValidateFunc:  validateWithRegExp(emailPattern),
 						},
 						"account_id": &schema.Schema{
 							Type:          schema.TypeString,
@@ -125,8 +127,30 @@ func resourceDropboxPaperDocUserRead(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-// TODO:
 func resourceDropboxPaperDocUserUpdate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := paper.New(*config)
+
+	pid := d.Get("doc_id").(string)
+
+	// TODO: Get members list from active doc not terraform state to get true list to remove from
+	members := d.Get("members").([]map[string]string)
+
+	d.Partial(true)
+	if d.HasChange("doc_id") {
+		err := removeUsersFromDocument(members, pid, &client)
+		if err != nil {
+			return err
+		}
+		d.SetPartial("doc_id")
+	}
+
+	// TODO:  Find difference between changed members and active and manage accordingly
+	if d.HasChange("members") {
+
+	}
+	d.Partial(false)
+
 	return nil
 }
 
@@ -189,4 +213,31 @@ func createListOfAddMembers(m []map[string]interface{}) []*paper.AddMember {
 		members = append(members, mem)
 	}
 	return members
+}
+
+func removeUsersFromDocument(members []map[string]string, id string, client *paper.Client) error {
+	for _, m := range members {
+		opts := &paper.RemovePaperDocUser{
+			RefPaperDoc: *paper.NewRefPaperDoc(id),
+		}
+
+		if m["email"] != "" {
+			opts.Member = &sharing.MemberSelector{
+				Tagged: db.Tagged{Tag: "email"},
+				Email:  m["email"],
+			}
+		} else {
+			opts.Member = &sharing.MemberSelector{
+				Tagged:    db.Tagged{Tag: "dropbox_id"},
+				DropboxId: m["account_id"],
+			}
+		}
+
+		err := (*client).DocsUsersRemove(opts)
+		if err != nil {
+			return fmt.Errorf("Doc Users Update Failure: Couldn't remove user %+v from document %s", opts.Member, id)
+		}
+	}
+
+	return nil
 }

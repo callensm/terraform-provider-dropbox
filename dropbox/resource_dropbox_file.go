@@ -24,8 +24,9 @@ func resourceDropboxFile() *schema.Resource {
 				StateFunc: convertContentToB64(),
 			},
 			"path": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validateWithRegExp(uploadPathPattern),
 			},
 			"mode": &schema.Schema{
 				Type:         schema.TypeString,

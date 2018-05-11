@@ -95,3 +95,19 @@ func validateFileWriteMode() schema.SchemaValidateFunc {
 		return
 	}
 }
+
+func validateFileAccessLevel() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		level := v.(string)
+		valid := []string{"owner", "editor", "viewer", "viewer_no_comment"}
+
+		for _, v := range valid {
+			if level == v {
+				return
+			}
+		}
+
+		errors = append(errors, fmt.Errorf("Access Level Validation Failure: %s is not a valid file access level", level))
+		return
+	}
+}

@@ -33,6 +33,18 @@ output "file_hash" {
 * **hash** - _A generated hash of the file's content that was uploaded_
 * **size** - _The size in bytes of the content that was uploaded as the file_
 
+## **dropbox_file_members**
+
+### Example Usage
+
+```hcl
+
+```
+
+### Argument Reference
+
+### Attributes Reference
+
 ## **dropbox_folder**
 
 Management of folders within your Dropbox account (not including Dropbox Paper).
