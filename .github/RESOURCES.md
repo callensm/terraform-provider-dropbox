@@ -35,6 +35,8 @@ output "file_hash" {
 
 ## **dropbox_file_members**
 
+Resource associated with the management of Dropbox file sharing with specific members of a team or references by account email of ID.
+
 ### Example Usage
 
 ```hcl
@@ -51,6 +53,7 @@ resource "dropbox_file_members" "mems" {
       email = "user@example.com"
     }
   ]
+  access_level = "editor"
 }
 ```
 
@@ -62,7 +65,7 @@ resource "dropbox_file_members" "mems" {
   * **account_id** - (Optional) _The Dropbox account identifier for the member being added_
 * **message** - (Optional) _A custom message to be emailed to the added member(s) when they are notified of their new file access_
 * **quiet** - (Optional) _Boolean value to specific whether newly added members will be notified of their new file access. Defaults to `false` if no value is given, meaning they will be notified_
-* **access_level** - (Optional) _The access level tier that is to be granted to all members in specified in the `members` input. Values can be either: `owner`, `editor`, `viewer`, or `viewer_no_comment`._
+* **access_level** - (Optional) _The access level tier that is to be granted to all members in specified in the `members` input. Values can be either: `owner`, `editor`, `viewer`, or `viewer_no_comment`. If no value is given, the default level is `viewer`_
 
 ### Attributes Reference
 
@@ -100,6 +103,46 @@ resource "dropbox_folder" "folder_b" {
 * **folder_id** - _The unique identifier for the newly created folder_
 * **name** - _The display name of the new folder_
 * **property_group_templates** - _A list of template IDs for the property groups that are assigned to the new folder. May be empty_
+
+## **dropbox_folder_members**
+
+Resource for managing folder sharing access levels among other accounts within a team or publicily.
+
+### Example Usage
+
+```hcl
+resource "dropbox_folder" "foo" {
+  path = "/source-code"
+}
+
+resource "dropbox_folder_members" "mems" {
+  folder_id = "${dropbox_folder.foo.id}"
+  members = [
+    {
+      email        = "user@example.com"
+      access_level = "edit"
+    },
+    {
+      account_id   = "dbid:4kjh342ljg23fds"
+      access_level = "viewer"
+    }
+  ]
+}
+```
+
+### Argument Reference
+
+* **folder_id** - (Required) _The unique identifier for the Dropbox folder you are adding the new members to_
+* **members** - (Required) _List of Dropbox users/accounts that are to be give file access. `email` and `account_id` are conflicting fields so only give one per member_
+  * **email** - (Optional) _Associated email address for the member being added_
+  * **account_id** - (Optional) _The Dropbox account identifier for the member being added_
+  * **access_level** - (Optional) _The access level tier that is to be granted to all members in specified in the `members` input. Values can be either: `owner`, `editor`, `viewer`, or `viewer_no_comment`. If no value is given, the default level is `viewer`_
+* **message** - (Optional) _A custom message to be emailed to the added member(s) when they are notified of their new file access_
+* **quiet** - (Optional) _Boolean value to specific whether newly added members will be notified of their new file access. Defaults to `false` if no value is given, meaning they will be notified_
+
+### Attributes Reference
+
+There are no additional attributes that are received from the creation of this resource.
 
 ## **dropbox_paper_doc**
 

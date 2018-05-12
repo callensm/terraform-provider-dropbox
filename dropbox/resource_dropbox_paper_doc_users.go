@@ -161,7 +161,7 @@ func resourceDropboxPaperDocUserDelete(d *schema.ResourceData, meta interface{})
 		RefPaperDoc: *paper.NewRefPaperDoc(d.Get("doc_id").(string)),
 	}
 
-	for _, member := range createListOfMembers(d.Get("members").([]map[string]interface{})) {
+	for _, member := range createListOfMemberSelectors(d.Get("members").([]map[string]interface{})) {
 		opts.Member = member
 		err := client.DocsUsersRemove(opts)
 		if err != nil {
@@ -175,9 +175,6 @@ func resourceDropboxPaperDocUserDelete(d *schema.ResourceData, meta interface{})
 func createListOfAddMembers(m []map[string]interface{}) []*paper.AddMember {
 	members := make([]*paper.AddMember, 0, len(m))
 	for _, i := range m {
-		var permission paper.PaperDocPermissionLevel
-		permission.Tag = i["permissions"].(string)
-
 		var selector sharing.MemberSelector
 		if email := i["email"].(string); email != "" {
 			selector.Tag = "email"
@@ -188,7 +185,7 @@ func createListOfAddMembers(m []map[string]interface{}) []*paper.AddMember {
 		}
 
 		mem := &paper.AddMember{
-			PermissionLevel: &permission,
+			PermissionLevel: &paper.PaperDocPermissionLevel{Tagged: db.Tagged{Tag: i["permissions"].(string)}},
 			Member:          &selector,
 		}
 

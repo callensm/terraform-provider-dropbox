@@ -9,6 +9,8 @@ import (
 
 const fileIDPattern = "((/|id:).*|nspath:[0-9]+:.*)|ns:[0-9]+(/.*)?"
 
+const folderIDPattern = "[-_0-9a-zA-Z:]+"
+
 const emailPattern = "^['&A-Za-z0-9._%+-]+@[A-Za-z0-9-][A-Za-z0-9.-]*.[A-Za-z]{2,15}$"
 
 const folderPathPattern = "(/(.|[\r\n])*)|(ns:[0-9]+(/.*)?)"
@@ -104,7 +106,7 @@ func validateFileWriteMode() schema.SchemaValidateFunc {
 	}
 }
 
-func validateFileAccessLevel() schema.SchemaValidateFunc {
+func validateAccessLevel() schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		level := v.(string)
 		valid := []string{"owner", "editor", "viewer", "viewer_no_comment"}
