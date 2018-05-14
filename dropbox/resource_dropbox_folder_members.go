@@ -83,6 +83,19 @@ func resourceDropboxFolderMembersCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceDropboxFolderMembersRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := sharing.New(*config)
+
+	opts := &sharing.ListFolderMembersArgs{
+		ListFolderMembersCursorArg: *sharing.NewListFolderMembersCursorArg(),
+		SharedFolderId:             d.Get("folder_id").(string),
+	}
+	members, err := client.ListFolderMembers(opts)
+	if err != nil {
+		return fmt.Errorf("Folder Member Read Failure: %s", err)
+	}
+
+	fmt.Println(members)
 	return nil
 }
 
@@ -91,6 +104,18 @@ func resourceDropboxFolderMembersUpdate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceDropboxFolderMembersDelete(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := sharing.New(*config)
+
+	opts := &sharing.RemoveFolderMemberArg{
+		SharedFolderId: d.Get("folder_id").(string),
+		LeaveACopy:     false,
+	}
+	err := removeFolderShareMembers(opts, &client, d.Get("members").([]map[string]string))
+	if err != nil {
+		return fmt.Errorf("Folder Member Deletion Failure: %s", err)
+	}
+
 	return nil
 }
 
@@ -114,4 +139,25 @@ func createListOfFolderMembers(m []map[string]interface{}) []*sharing.AddMember 
 		members = append(members, mem)
 	}
 	return members
+}
+
+func removeFolderShareMembers(arg *sharing.RemoveFolderMemberArg, client *sharing.Client, members []map[string]string) error {
+	for _, mem := range members {
+		if mem["email"] != "" {
+			arg.Member = &sharing.MemberSelector{
+				Tagged: db.Tagged{Tag: "email"},
+				Email:  mem["email"],
+			}
+		} else {
+			arg.Member = &sharing.MemberSelector{
+				Tagged:    db.Tagged{Tag: "dropbox_id"},
+				DropboxId: mem["account_id"],
+			}
+		}
+		_, err := (*client).RemoveFolderMember(arg)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
