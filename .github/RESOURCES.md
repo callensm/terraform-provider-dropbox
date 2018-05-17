@@ -216,7 +216,7 @@ resource "dropbox_paper_doc_users" "doc_users" {
 
 ## **dropbox_paper_sharing_policy**
 
-Set sharing policies for public and team use for a Dropbox Paper document.
+Set sharing policies for public and team use for a Dropbox Paper document. The deletion of this resource resets the public and team sharing policies to `invite_only`.
 
 ### Example Usage
 
