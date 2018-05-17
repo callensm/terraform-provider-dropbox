@@ -2,13 +2,15 @@ package dropbox
 
 import "testing"
 
-func TestValidateRegExpFileID(t *testing.T) {
-	validIDs := []string{"id:3kmLmQFnf1AAAAAAAAAAAw", "id:VvTaJu2VZzAAAAAAAAAADQ"}
+func TestValidateRegExp(t *testing.T) {
+	validIDs := map[string]string{
+		"id:3kmLmQFnf1AAAAAAAAAAAw": fileIDPattern,
+	}
 
-	for _, id := range validIDs {
-		_, errors := validateWithRegExp(fileIDPattern)(id, "test")
+	for key, val := range validIDs {
+		_, errors := validateWithRegExp(val)(key, "test")
 		if len(errors) != 0 {
-			t.Fatalf("RegExp Validator Failure: %s produced an output with errors", id)
+			t.Fatalf("RegExp Validator Failure: %s produced an output with errors", key)
 		}
 	}
 }
@@ -48,5 +50,27 @@ func TestDocPolicyType(t *testing.T) {
 	_, errors := validateDocPolicyType("team")("disabled", "test")
 	if len(errors) == 0 {
 		t.Fatalf("Doc Policy Validator Failure: there was no error for passing `disabled` to `team` policy type")
+	}
+}
+
+func TestFileWriteMode(t *testing.T) {
+	validModes := []string{"add", "overwrite", "update"}
+
+	for _, mode := range validModes {
+		_, errors := validateFileWriteMode()(mode, "test")
+		if len(errors) != 0 {
+			t.Fatalf("File Write Mode Validator Failure: %s produced an output with errors", mode)
+		}
+	}
+}
+
+func TestAccessLevels(t *testing.T) {
+	validLevels := []string{"owner", "editor", "viewer", "viewer_no_comment"}
+
+	for _, level := range validLevels {
+		_, errors := validateAccessLevel()(level, "test")
+		if len(errors) != 0 {
+			t.Fatalf("Access Level Validator Failure: %s produced an output with errors", level)
+		}
 	}
 }
