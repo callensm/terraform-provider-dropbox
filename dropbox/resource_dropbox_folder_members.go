@@ -12,18 +12,19 @@ func resourceDropboxFolderMembers() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDropboxFolderMembersCreate,
 		Read:   resourceDropboxFolderMembersRead,
-		Update: resourceDropboxFolderMembersUpdate,
 		Delete: resourceDropboxFolderMembersDelete,
 
 		Schema: map[string]*schema.Schema{
 			"folder_id": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateWithRegExp(folderIDPattern),
 			},
 			"members": &schema.Schema{
 				Type:     schema.TypeList,
 				Required: true,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"email": &schema.Schema{
@@ -95,11 +96,7 @@ func resourceDropboxFolderMembersRead(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Folder Member Read Failure: %s", err)
 	}
 
-	fmt.Println(members)
-	return nil
-}
-
-func resourceDropboxFolderMembersUpdate(d *schema.ResourceData, meta interface{}) error {
+	d.Set("members", createListOfTerraformMembers(members.Users))
 	return nil
 }
 
@@ -119,6 +116,18 @@ func resourceDropboxFolderMembersDelete(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
+func createListOfTerraformMembers(m []*sharing.UserMembershipInfo) []map[string]string {
+	output := make([]map[string]string, 0, len(m))
+	for _, i := range m {
+		member := make(map[string]string)
+		member["email"] = i.User.Email
+		member["account_id"] = i.User.AccountId
+		member["access_level"] = i.AccessType.Tag
+		output = append(output, member)
+	}
+	return output
+}
+
 func createListOfFolderMembers(m []map[string]interface{}) []*sharing.AddMember {
 	members := make([]*sharing.AddMember, 0, len(m))
 	for _, i := range m {
@@ -132,7 +141,7 @@ func createListOfFolderMembers(m []map[string]interface{}) []*sharing.AddMember 
 		}
 
 		mem := &sharing.AddMember{
-			AccessLevel: &sharing.AccessLevel{Tagged: db.Tagged{Tag: i["access_leve"].(string)}},
+			AccessLevel: &sharing.AccessLevel{Tagged: db.Tagged{Tag: i["access_level"].(string)}},
 			Member:      &selector,
 		}
 
