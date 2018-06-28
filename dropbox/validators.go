@@ -7,6 +7,16 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+const fileIDPattern = "((/|id:).*|nspath:[0-9]+:.*)|ns:[0-9]+(/.*)?"
+
+const folderIDPattern = "[-_0-9a-zA-Z:]+"
+
+const emailPattern = "^['&A-Za-z0-9._%+-]+@[A-Za-z0-9-][A-Za-z0-9.-]*.[A-Za-z]{2,15}$"
+
+const folderPathPattern = "(/(.|[\r\n])*)|(ns:[0-9]+(/.*)?)"
+
+const uploadPathPattern = "(/(.|[\r\n])*)|(ns:[0-9]+(/.*)?)|(id:.*)"
+
 func validateWithRegExp(pattern string) schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(string)
@@ -76,6 +86,38 @@ func validateDocPolicyType(env string) schema.SchemaValidateFunc {
 			}
 			errors = append(errors, fmt.Errorf("Share Policy Validation Failure: %s is not an approved team policy", policy))
 		}
+		return
+	}
+}
+
+func validateFileWriteMode() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		mode := v.(string)
+		valid := []string{"add", "overwrite", "update"}
+
+		for _, v := range valid {
+			if mode == v {
+				return
+			}
+		}
+
+		errors = append(errors, fmt.Errorf("Write Mode Validation Failure: %s is not a valid write mode", mode))
+		return
+	}
+}
+
+func validateAccessLevel() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		level := v.(string)
+		valid := []string{"owner", "editor", "viewer", "viewer_no_comment"}
+
+		for _, v := range valid {
+			if level == v {
+				return
+			}
+		}
+
+		errors = append(errors, fmt.Errorf("Access Level Validation Failure: %s is not a valid file access level", level))
 		return
 	}
 }

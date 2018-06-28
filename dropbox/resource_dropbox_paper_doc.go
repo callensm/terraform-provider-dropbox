@@ -3,7 +3,7 @@ package dropbox
 import (
 	"encoding/base64"
 	"fmt"
-	"os"
+	"strings"
 
 	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
@@ -18,15 +18,17 @@ func resourceDropboxPaperDoc() *schema.Resource {
 		Delete: resourceDropboxPaperDocDelete,
 
 		Schema: map[string]*schema.Schema{
-			"content_file": &schema.Schema{
+			"content": &schema.Schema{
 				Type:      schema.TypeString,
 				Required:  true,
-				StateFunc: convertDocContentToB64(),
+				StateFunc: convertContentToB64(),
 			},
 			"parent_folder": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "",
+				Description: "Unique identifier for the folder used as the destination",
 			},
 			"import_format": &schema.Schema{
 				Type:         schema.TypeString,
@@ -46,10 +48,6 @@ func resourceDropboxPaperDoc() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"owner": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -58,35 +56,24 @@ func resourceDropboxPaperDocCreate(d *schema.ResourceData, meta interface{}) err
 	config := meta.(*ProviderConfig).DropboxConfig
 	client := paper.New(*config)
 
-	var tag paper.ImportFormat
-	switch format := d.Get("import_format").(string); format {
-	case "html":
-	case "markdown":
-	case "plain_text":
-	case "other":
-		tag = paper.ImportFormat{Tagged: db.Tagged{Tag: format}}
-	default:
-		return fmt.Errorf("Doc Creation Failure: Invalid import format given for paper document creation: %s", format)
-	}
-
-	contentFile := d.Get("content_file").(string)
-	reader, err := os.Open(contentFile)
-	if err != nil {
-		return err
-	}
+	content := d.Get("content").(string)
+	reader := strings.NewReader(content)
 
 	opts := &paper.PaperDocCreateArgs{
-		ImportFormat:   &tag,
+		ImportFormat:   &paper.ImportFormat{Tagged: db.Tagged{Tag: d.Get("import_format").(string)}},
 		ParentFolderId: d.Get("parent_folder").(string),
 	}
+
 	results, err := client.DocsCreate(opts, reader)
 	if err != nil {
-		return err
+		return fmt.Errorf("Doc Creation Failure: %s", err)
 	}
 
 	d.SetId(results.DocId)
-
-	return resourceDropboxFolderRead(d, meta)
+	d.Set("doc_id", results.DocId)
+	d.Set("title", results.Title)
+	d.Set("revision", results.Revision)
+	return nil
 }
 
 func resourceDropboxPaperDocRead(d *schema.ResourceData, meta interface{}) error {
@@ -112,35 +99,42 @@ func resourceDropboxPaperDocRead(d *schema.ResourceData, meta interface{}) error
 	}
 	export, _, err := client.DocsDownload(opts)
 	if err != nil {
-		return err
+		return fmt.Errorf("Doc Read Failure: %s", err)
 	}
 
 	d.Set("doc_id", d.Id())
 	d.Set("title", export.Title)
 	d.Set("revision", export.Revision)
-	d.Set("owner", export.Owner)
 	return nil
 }
 
 func resourceDropboxPaperDocUpdate(d *schema.ResourceData, meta interface{}) error {
-	// config := meta.(*ProviderConfig).DropboxConfig
-	// client := paper.New(*config)
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := paper.New(*config)
+	pid := d.Id()
 
-	// var format *paper.ImportFormat
-	// format.Tag = d.Get("import_format").(string)
+	content := d.Get("content").(string)
+	reader := strings.NewReader(content)
 
-	// var policy *paper.PaperDocUpdatePolicy
-	// policy.Tag = "overwrite_all"
+	d.Partial(true)
+	if d.HasChange("content") || d.HasChange("import_format") {
+		updateOpts := &paper.PaperDocUpdateArgs{
+			RefPaperDoc:     *paper.NewRefPaperDoc(pid),
+			DocUpdatePolicy: &paper.PaperDocUpdatePolicy{Tagged: db.Tagged{Tag: "overwrite_all"}},
+			Revision:        d.Get("revision").(int64),
+			ImportFormat:    &paper.ImportFormat{Tagged: db.Tagged{Tag: d.Get("import_format").(string)}},
+		}
 
-	// opts := &paper.PaperDocUpdateArgs{
-	// 	RefPaperDoc:     *paper.NewRefPaperDoc(d.Id()),
-	// 	Revision:        d.Get("revision").(int64),
-	// 	ImportFormat:    format,
-	// 	DocUpdatePolicy: policy,
-	// }
-	// result, err := client.DocsUpdate(opts, nil)
+		res, err := client.DocsUpdate(updateOpts, reader)
+		if err != nil {
+			return fmt.Errorf("Doc Update Failure: %s", err)
+		}
 
-	// TODO: Implement state usage for file contents changing
+		d.SetPartial("content")
+		d.SetPartial("import_format")
+		d.Set("revision", res.Revision)
+	}
+	d.Partial(false)
 
 	return nil
 }
@@ -154,7 +148,7 @@ func resourceDropboxPaperDocDelete(d *schema.ResourceData, meta interface{}) err
 	return err
 }
 
-func convertDocContentToB64() schema.SchemaStateFunc {
+func convertContentToB64() schema.SchemaStateFunc {
 	return func(data interface{}) string {
 		content := data.(string)
 		return base64.StdEncoding.EncodeToString([]byte(content))

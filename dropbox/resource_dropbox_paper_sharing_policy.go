@@ -52,18 +52,68 @@ func resourceDropboxPaperSharingPolicyCreate(d *schema.ResourceData, meta interf
 	}
 
 	d.SetId(fmt.Sprintf("pset:%s", d.Get("doc_id").(string)))
-
 	return nil
 }
 
 func resourceDropboxPaperSharingPolicyRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := paper.New(*config)
+
+	opts := paper.NewRefPaperDoc(d.Get("doc_id").(string))
+	policy, err := client.DocsSharingPolicyGet(opts)
+	if err != nil {
+		return fmt.Errorf("Sharing Policy Read Failure: %s", err)
+	}
+
+	d.Set("public_policy", policy.PublicSharingPolicy.Tag)
+	d.Set("team_policy", policy.TeamSharingPolicy.Tag)
 	return nil
 }
 
 func resourceDropboxPaperSharingPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := paper.New(*config)
+
+	if d.HasChange("doc_id") || d.HasChange("public_policy") || d.HasChange("team_policy") {
+		opts := &paper.PaperDocSharingPolicy{
+			RefPaperDoc: *paper.NewRefPaperDoc(d.Get("doc_id").(string)),
+			SharingPolicy: &paper.SharingPolicy{
+				PublicSharingPolicy: &paper.SharingPublicPolicyType{Tagged: db.Tagged{Tag: d.Get("public_policy").(string)}},
+				TeamSharingPolicy:   &paper.SharingTeamPolicyType{Tagged: db.Tagged{Tag: d.Get("team_policy").(string)}},
+			},
+		}
+
+		err := client.DocsSharingPolicySet(opts)
+		if err != nil {
+			return fmt.Errorf("Sharing Policy Update Failure: %s", err)
+		}
+
+		d.Partial(true)
+		d.SetPartial("doc_id")
+		d.SetPartial("public_policy")
+		d.SetPartial("team_policy")
+		d.Partial(false)
+	}
+
 	return nil
 }
 
 func resourceDropboxPaperSharingPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := paper.New(*config)
+
+	opts := &paper.PaperDocSharingPolicy{
+		RefPaperDoc: *paper.NewRefPaperDoc(d.Get("doc_id").(string)),
+		SharingPolicy: &paper.SharingPolicy{
+			PublicSharingPolicy: &paper.SharingPublicPolicyType{Tagged: db.Tagged{Tag: "invite_only"}},
+			TeamSharingPolicy:   &paper.SharingTeamPolicyType{Tagged: db.Tagged{Tag: "invite_only"}},
+		},
+	}
+
+	err := client.DocsSharingPolicySet(opts)
+	if err != nil {
+		return fmt.Errorf("Sharing Policy Deletion Failure: %s", err)
+	}
+
 	return nil
 }
