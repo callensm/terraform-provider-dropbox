@@ -1,7 +1,7 @@
 PLUGINS_DIR=~/.terraform.d/plugins/darwin_amd64
 PKG_NAME=dropbox
 
-default: clean build move
+default: clean build
 
 build:
 	go install
