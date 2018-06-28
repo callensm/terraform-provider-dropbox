@@ -2,8 +2,8 @@
 
 ## Requirements
 
-* Terraform 0.10.x or higher
-* Go 1.8 or higher
+- Terraform 0.10.x or higher
+- Go 1.8 or higher
 
 ## Building The Provider
 
@@ -34,7 +34,3 @@ provider "dropbox" {
 ```
 
 **access_token** is the generated auth token from Dropbox when you create an application through their developer console. It can be manually placed in the provider configuration as shown above, or if not provided, it will automatically attempt to retrieve the token value from the `DROPBOX_TOKEN` environment variable.
-
-Data Source [documentation](.github/DATA_SOURCES.md)
-
-Resource [documentation](.github/RESOURCES.md)
