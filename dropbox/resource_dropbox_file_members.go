@@ -19,6 +19,7 @@ func resourceDropboxFileMembers() *schema.Resource {
 			"file_id": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateWithRegExp(fileIDPattern),
 			},
 			"members": &schema.Schema{
@@ -90,10 +91,35 @@ func resourceDropboxFileMembersCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceDropboxFileMembersRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*ProviderConfig).DropboxConfig
+	client := sharing.New(*config)
+
+	opts := sharing.NewListFileMembersArg(d.Get("file_id").(string))
+	fileMembers, err := client.ListFileMembers(opts)
+	if err != nil {
+		return fmt.Errorf("File Member Read Failure: %s", err)
+	}
+
+	var members []string
+	for _, m := range fileMembers.Users {
+		if email := m.User.Email; email != "" {
+			members = append(members, email)
+		} else {
+			members = append(members, m.User.AccountId)
+		}
+	}
+
+	d.Set("members", members)
 	return nil
 }
 
 func resourceDropboxFileMembersUpdate(d *schema.ResourceData, meta interface{}) error {
+	d.Partial(true)
+	if d.HasChange("memebrs") {
+		return resourceDropboxFileMembersCreate(d, meta)
+	}
+	d.Partial(false)
+
 	return nil
 }
 
