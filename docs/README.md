@@ -1,5 +1,11 @@
 # Terraform Dropbox Provider
 
+```hcl
+provider "dropbox" {
+  access_token = "xxxxxxxxxxxxxx"
+}
+```
+
 ## Data Source Documentation
 
 ### **dropbox_user_current**
