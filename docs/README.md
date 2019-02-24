@@ -1,5 +1,7 @@
 # Terraform Dropbox Provider
 
+## Setup
+
 ```hcl
 provider "dropbox" {
   access_token = "xxxxxxxxxxxxxx"

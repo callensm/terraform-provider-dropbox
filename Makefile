@@ -5,7 +5,7 @@ VERSION=2.0.0
 default: clean build
 
 build:
-	go build -o terraform-provider-$(PKG_NAME)_v$(VERSION) && make move
+	go build -o terraform-provider-$(PKG_NAME)_v$(VERSION)
 
 move:
 	cp ./terraform-provider-$(PKG_NAME)_v$(VERSION) $(PLUGINS_DIR)
