@@ -1,13 +1,16 @@
 PLUGINS_DIR=~/.terraform.d/plugins/darwin_amd64
 PKG_NAME=dropbox
+VERSION=2.0.0
 
 default: clean build
 
 build:
-	go install
+	go build -o terraform-provider-$(PKG_NAME)_v$(VERSION) && make move
 
 move:
-	cp $(GOPATH)/bin/terraform-provider-$(PKG_NAME) $(PLUGINS_DIR)
+	cp ./terraform-provider-$(PKG_NAME)_v$(VERSION) $(PLUGINS_DIR)
 
 clean:
-	rm -f $(GOPATH)/bin/terraform-provider-$(PKG_NAME) $(PLUGINS_DIR)/terraform-provider-$(PKG_NAME)
+	rm -f ./terraform-provider-$(PKG_NAME)_v$(VERSION) $(PLUGINS_DIR)/terraform-provider-$(PKG_NAME)_v$(VERSION)
+
+.PHONY: default build move clean

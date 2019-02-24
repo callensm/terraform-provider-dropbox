@@ -1,3 +1,5 @@
 token.txt
 vendor/*/
 example/
+_vendor*
+terraform-provider-dropbox*

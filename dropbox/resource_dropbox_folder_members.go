@@ -12,6 +12,7 @@ func resourceDropboxFolderMembers() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDropboxFolderMembersCreate,
 		Read:   resourceDropboxFolderMembersRead,
+		Update: resourceDropboxFolderMembersUpdate,
 		Delete: resourceDropboxFolderMembersDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -98,6 +99,10 @@ func resourceDropboxFolderMembersRead(d *schema.ResourceData, meta interface{}) 
 
 	d.Set("members", createListOfTerraformMembers(members.Users))
 	return nil
+}
+
+func resourceDropboxFolderMembersUpdate(d *schema.ResourceData, meta interface{}) error {
+	return resourceDropboxFolderMembersCreate(d, meta)
 }
 
 func resourceDropboxFolderMembersDelete(d *schema.ResourceData, meta interface{}) error {
