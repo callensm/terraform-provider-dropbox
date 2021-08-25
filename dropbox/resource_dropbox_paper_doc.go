@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
-	"github.com/hashicorp/terraform/helper/schema"
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/paper"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDropboxPaperDoc() *schema.Resource {
@@ -18,33 +18,33 @@ func resourceDropboxPaperDoc() *schema.Resource {
 		Delete: resourceDropboxPaperDocDelete,
 
 		Schema: map[string]*schema.Schema{
-			"content": &schema.Schema{
+			"content": {
 				Type:      schema.TypeString,
 				Required:  true,
 				StateFunc: convertContentToB64(),
 			},
-			"parent_folder": &schema.Schema{
+			"parent_folder": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
 				Default:     "",
 				Description: "Unique identifier for the folder used as the destination",
 			},
-			"import_format": &schema.Schema{
+			"import_format": {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "Valid formats include: html, markdown, plain_text, other",
 				ValidateFunc: validateDocImportFormat(),
 			},
-			"doc_id": &schema.Schema{
+			"doc_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"revision": &schema.Schema{
+			"revision": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"title": &schema.Schema{
+			"title": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -130,8 +130,6 @@ func resourceDropboxPaperDocUpdate(d *schema.ResourceData, meta interface{}) err
 			return fmt.Errorf("Doc Update Failure: %s", err)
 		}
 
-		d.SetPartial("content")
-		d.SetPartial("import_format")
 		d.Set("revision", res.Revision)
 	}
 	d.Partial(false)

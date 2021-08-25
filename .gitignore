@@ -1,5 +1,5 @@
-token.txt
-vendor/*/
-example/
-_vendor*
-terraform-provider-dropbox*
+.DS_Store
+.env
+
+vendor/
+bin/

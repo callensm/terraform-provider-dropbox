@@ -2,10 +2,11 @@ package dropbox
 
 import (
 	"fmt"
+	"regexp"
 
-	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/sharing"
-	"github.com/hashicorp/terraform/helper/schema"
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/sharing"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDropboxFileMembers() *schema.Resource {
@@ -16,41 +17,29 @@ func resourceDropboxFileMembers() *schema.Resource {
 		Delete: resourceDropboxFileMembersDelete,
 
 		Schema: map[string]*schema.Schema{
-			"file_id": &schema.Schema{
+			"file_id": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateWithRegExp(fileIDPattern),
 			},
-			"members": &schema.Schema{
-				Type:     schema.TypeList,
+			"members": {
+				Type:     schema.TypeSet,
 				Required: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"email": &schema.Schema{
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"members.account_id"},
-							ValidateFunc:  validateWithRegExp(emailPattern),
-						},
-						"account_id": &schema.Schema{
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"members.email"},
-						},
-					},
-				},
+				MinItems: 1,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 			},
-			"message": &schema.Schema{
+			"message": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"quiet": &schema.Schema{
+			"quiet": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"access_level": &schema.Schema{
+			"access_level": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "viewer",
@@ -66,7 +55,7 @@ func resourceDropboxFileMembersCreate(d *schema.ResourceData, meta interface{}) 
 
 	opts := &sharing.AddFileMemberArgs{
 		File:        d.Get("file_id").(string),
-		Members:     createListOfMemberSelectors(d.Get("members").([]map[string]interface{})),
+		Members:     createListOfMemberSelectors(d.Get("members").([]string)),
 		Quiet:       d.Get("quiet").(bool),
 		AccessLevel: &sharing.AccessLevel{Tagged: db.Tagged{Tag: d.Get("access_level").(string)}},
 	}
@@ -131,7 +120,7 @@ func resourceDropboxFileMembersDelete(d *schema.ResourceData, meta interface{}) 
 		File: d.Get("file_id").(string),
 	}
 
-	for _, member := range createListOfMemberSelectors(d.Get("members").([]map[string]interface{})) {
+	for _, member := range createListOfMemberSelectors(d.Get("members").([]string)) {
 		opts.Member = member
 		res, err := client.RemoveFileMember2(opts)
 		if err != nil {
@@ -145,19 +134,20 @@ func resourceDropboxFileMembersDelete(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func createListOfMemberSelectors(m []map[string]interface{}) []*sharing.MemberSelector {
-	members := make([]*sharing.MemberSelector, 0, len(m))
-	for _, i := range m {
-		var selector sharing.MemberSelector
-		if email := i["email"].(string); email != "" {
-			selector.Tag = "email"
-			selector.Email = email
-		} else {
-			selector.Tag = "dropbox_id"
-			selector.DropboxId = i["account_id"].(string)
-		}
+func createListOfMemberSelectors(members []string) []*sharing.MemberSelector {
+	selectors := make([]*sharing.MemberSelector, len(members))
+	emailRx := regexp.MustCompile(emailPattern)
 
-		members = append(members, &selector)
+	for _, m := range members {
+		var s *sharing.MemberSelector
+		if emailRx.MatchString(m) {
+			s.Tag = "email"
+			s.Email = m
+		} else {
+			s.Tag = "dropbox_id"
+			s.DropboxId = m
+		}
+		selectors = append(selectors, s)
 	}
-	return members
+	return selectors
 }

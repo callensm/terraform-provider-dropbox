@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
-	"github.com/hashicorp/terraform/helper/schema"
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/files"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDropboxFile() *schema.Resource {
@@ -17,40 +17,40 @@ func resourceDropboxFile() *schema.Resource {
 		Delete: resourceDropboxFileDelete,
 
 		Schema: map[string]*schema.Schema{
-			"content": &schema.Schema{
+			"content": {
 				Type:      schema.TypeString,
 				Required:  true,
 				ForceNew:  true,
 				StateFunc: convertContentToB64(),
 			},
-			"path": &schema.Schema{
+			"path": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateWithRegExp(uploadPathPattern),
 			},
-			"mode": &schema.Schema{
+			"mode": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "add",
 				Description:  "Valid formats modes: add, overwrite, and update",
 				ValidateFunc: validateFileWriteMode(),
 			},
-			"auto_rename": &schema.Schema{
+			"auto_rename": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"mute": &schema.Schema{
+			"mute": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"hash": &schema.Schema{
+			"hash": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "A generated hash of the uploaded content",
 			},
-			"size": &schema.Schema{
+			"size": {
 				Type:        schema.TypeInt,
 				Computed:    true,
 				Description: "The size of the uploaded data in bytes",
@@ -110,15 +110,15 @@ func resourceDropboxFileUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	d.Partial(true)
 	if d.HasChange("path") {
+		newPath := files.NewRelocationPath(oldPath, d.Get("path").(string))
+
 		optsMove := &files.RelocationArg{
-			RelocationPath: *files.NewRelocationPath(oldPath, d.Get("path").(string)),
+			RelocationPath: *newPath,
 		}
 		_, err := client.MoveV2(optsMove)
 		if err != nil {
 			return fmt.Errorf("File Update Failure: %s", err)
 		}
-
-		d.SetPartial("path")
 	}
 	d.Partial(false)
 

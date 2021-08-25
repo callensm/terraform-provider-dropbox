@@ -1,9 +1,9 @@
 package dropbox
 
 import (
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/file_properties"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/file_properties"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/files"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDropboxFolder() *schema.Resource {
@@ -13,27 +13,27 @@ func resourceDropboxFolder() *schema.Resource {
 		Delete: resourceDropboxFolderDelete,
 
 		Schema: map[string]*schema.Schema{
-			"path": &schema.Schema{
+			"path": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateWithRegExp(folderPathPattern),
 			},
-			"auto_rename": &schema.Schema{
+			"auto_rename": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 				ForceNew: true,
 			},
-			"folder_id": &schema.Schema{
+			"folder_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"property_group_templates": &schema.Schema{
+			"property_group_templates": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,

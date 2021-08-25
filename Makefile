@@ -2,15 +2,18 @@ PLUGINS_DIR=~/.terraform.d/plugins/darwin_amd64
 PKG_NAME=dropbox
 VERSION=3.0.0
 
-default: clean build
+.DEFAULT_GOAL := build
 
-build:
-	go build -o terraform-provider-$(PKG_NAME)_v$(VERSION) && make move
-
-move:
-	cp ./terraform-provider-$(PKG_NAME)_v$(VERSION) $(PLUGINS_DIR)
+build: vendor
+	go build -o terraform-provider-$(PKG_NAME)_v$(VERSION)
 
 clean:
-	rm -f ./terraform-provider-$(PKG_NAME)_v$(VERSION) $(PLUGINS_DIR)/terraform-provider-$(PKG_NAME)_v$(VERSION)
+	rm -rf vendor/
 
-.PHONY: default build move clean
+test: vendor
+	go test -v ./...
+
+vendor: clean
+	go mod tidy && go mod verify && go mod vendor
+
+.PHONY: build clean test vendor

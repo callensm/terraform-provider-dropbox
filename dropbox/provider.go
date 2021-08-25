@@ -1,17 +1,15 @@
 package dropbox
 
 import (
-	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider for the Dropbox API in Terraform
 // returns a terraform.ResourceProvider
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"access_token": &schema.Schema{
+			"access_token": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
@@ -37,14 +35,6 @@ func Provider() terraform.ResourceProvider {
 			"dropbox_paper_sharing_policy": dataSourceDropboxPaperSharingPolicy(),
 		},
 
-		ConfigureFunc: providerConfigure,
+		ConfigureFunc: providerConfig,
 	}
-}
-
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	cfg := &ProviderConfig{
-		DropboxConfig: &db.Config{Token: d.Get("access_token").(string)},
-	}
-
-	return cfg, nil
 }

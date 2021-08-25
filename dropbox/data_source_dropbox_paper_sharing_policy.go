@@ -3,8 +3,8 @@ package dropbox
 import (
 	"fmt"
 
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/paper"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceDropboxPaperSharingPolicy() *schema.Resource {
@@ -12,16 +12,16 @@ func dataSourceDropboxPaperSharingPolicy() *schema.Resource {
 		Read: dataSourceDropboxPaperSharingPolicyRead,
 
 		Schema: map[string]*schema.Schema{
-			"doc_id": &schema.Schema{
+			"doc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"public_policy": &schema.Schema{
+			"public_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"team_policy": &schema.Schema{
+			"team_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

@@ -1,8 +1,8 @@
 package dropbox
 
 import (
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/users"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/users"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceDropboxUserCurrent() *schema.Resource {
@@ -10,19 +10,19 @@ func dataSourceDropboxUserCurrent() *schema.Resource {
 		Read: dataSourceDropboxUserCurrentRead,
 
 		Schema: map[string]*schema.Schema{
-			"account_id": &schema.Schema{
+			"account_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"account_type": &schema.Schema{
+			"account_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"email": &schema.Schema{
+			"email": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

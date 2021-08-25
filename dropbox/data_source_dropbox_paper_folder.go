@@ -3,8 +3,8 @@ package dropbox
 import (
 	"fmt"
 
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/paper"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceDropboxPaperFolder() *schema.Resource {
@@ -12,21 +12,21 @@ func dataSourceDropboxPaperFolder() *schema.Resource {
 		Read: dataSourceDropboxPaperFolderRead,
 
 		Schema: map[string]*schema.Schema{
-			"doc_id": &schema.Schema{
+			"doc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"folders": &schema.Schema{
+			"folders": {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "List of folders that contain the document reference",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
