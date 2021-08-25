@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDropboxPaperFolder(t *testing.T) {
@@ -14,7 +14,7 @@ func TestAccDropboxPaperFolder(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxPaperFolderDataConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccPaperFolderExists("data.dropbox_paper_folder.foo"),

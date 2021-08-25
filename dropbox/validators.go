@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const fileIDPattern = "((/|id:).*|nspath:[0-9]+:.*)|ns:[0-9]+(/.*)?"

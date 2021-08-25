@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDropboxUserCurrent(t *testing.T) {
@@ -13,7 +13,7 @@ func TestAccDropboxUserCurrent(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxUserCurrentDataConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccUserCurrentExists("data.dropbox_user_current.user"),
@@ -28,7 +28,7 @@ func TestAccDropboxUserCurrent_type(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxUserCurrentDataConfig,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.dropbox_user_current.user", "account_type", "basic"),

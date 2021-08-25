@@ -3,9 +3,9 @@ package dropbox
 import (
 	"fmt"
 
-	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
-	"github.com/hashicorp/terraform/helper/schema"
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/paper"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDropboxPaperSharingPolicy() *schema.Resource {
@@ -16,16 +16,16 @@ func resourceDropboxPaperSharingPolicy() *schema.Resource {
 		Delete: resourceDropboxPaperSharingPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
-			"doc_id": &schema.Schema{
+			"doc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"public_policy": &schema.Schema{
+			"public_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateDocPolicyType("public"),
 			},
-			"team_policy": &schema.Schema{
+			"team_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateDocPolicyType("team"),
@@ -74,6 +74,7 @@ func resourceDropboxPaperSharingPolicyUpdate(d *schema.ResourceData, meta interf
 	config := meta.(*ProviderConfig).DropboxConfig
 	client := paper.New(*config)
 
+	d.Partial(true)
 	if d.HasChange("doc_id") || d.HasChange("public_policy") || d.HasChange("team_policy") {
 		opts := &paper.PaperDocSharingPolicy{
 			RefPaperDoc: *paper.NewRefPaperDoc(d.Get("doc_id").(string)),
@@ -87,13 +88,8 @@ func resourceDropboxPaperSharingPolicyUpdate(d *schema.ResourceData, meta interf
 		if err != nil {
 			return fmt.Errorf("Sharing Policy Update Failure: %s", err)
 		}
-
-		d.Partial(true)
-		d.SetPartial("doc_id")
-		d.SetPartial("public_policy")
-		d.SetPartial("team_policy")
-		d.Partial(false)
 	}
+	d.Partial(false)
 
 	return nil
 }

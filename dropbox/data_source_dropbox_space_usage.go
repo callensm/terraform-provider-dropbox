@@ -3,8 +3,8 @@ package dropbox
 import (
 	"fmt"
 
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/users"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/users"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceDropboxSpaceUsage() *schema.Resource {
@@ -12,15 +12,15 @@ func dataSourceDropboxSpaceUsage() *schema.Resource {
 		Read: dataSourceDropboxSpaceUsageRead,
 
 		Schema: map[string]*schema.Schema{
-			"used": &schema.Schema{
+			"used": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"allocated": &schema.Schema{
+			"allocated": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"is_team_allocation": &schema.Schema{
+			"is_team_allocation": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},

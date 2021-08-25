@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/sharing"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/sharing"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDropboxFolderMember(t *testing.T) {
@@ -14,7 +14,7 @@ func TestAccDropboxFolderMember(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxFolderMemberConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccFolderMembersSet("dropbox_folder_members.foo"),
@@ -64,15 +64,15 @@ resource "dropbox_folder" "src" {
 
 resource "dropbox_folder_members" "foo" {
 	folder_id = "${dropbox_folder.src.folder_id}"
+	quiet     = true
 	members   = [
 		{
-			email        = "test@example.com"
+			identity     = "test@example.com"
 			access_level = "viewer"
 		},
 		{
-			account_id = "agqorghqovn34"
+			identity = "agqorghqovn34"
 		}
 	]
-	quiet     = true
 }
 `

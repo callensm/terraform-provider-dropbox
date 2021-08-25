@@ -3,7 +3,7 @@ package dropbox
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDropboxPaperDocUsers(t *testing.T) {
@@ -11,7 +11,7 @@ func TestAccDropboxPaperDocUsers(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxPaperUsersConfig,
 				Check:  resource.ComposeTestCheckFunc(),
 			},
@@ -25,7 +25,7 @@ resource "dropbox_paper_doc_users" "foo" {
 	quiet   = false
 	members = [
 		{
-			email       = "callensmatt@gmail.com"
+			identity    = "callensmatt@gmail.com"
 			permissions = "edit"
 		}
 	]

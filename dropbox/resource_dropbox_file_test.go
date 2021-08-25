@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/files"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDropboxFile_basic(t *testing.T) {
@@ -14,7 +14,7 @@ func TestAccDropboxFile_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxFileConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccFileCreated("dropbox_file.foo"),
@@ -29,7 +29,7 @@ func TestAccDropboxFile_folder(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxFileFolderConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccFileCreated("dropbox_file.bar"),

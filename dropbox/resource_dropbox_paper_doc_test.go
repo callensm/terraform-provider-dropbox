@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/paper"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDropboxPaperDoc_basic(t *testing.T) {
@@ -15,7 +15,7 @@ func TestAccDropboxPaperDoc_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxPaperDocConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccPaperDocCreated("dropbox_paper_doc.doc"),
@@ -30,7 +30,7 @@ func TestAccDropboxPaperDoc_foldered(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxPaperDocFolderConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccPaperDocCreated("dropbox_paper_doc.foldered_doc"),

@@ -2,10 +2,11 @@ package dropbox
 
 import (
 	"fmt"
+	"regexp"
 
-	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/sharing"
-	"github.com/hashicorp/terraform/helper/schema"
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/sharing"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDropboxFolderMembers() *schema.Resource {
@@ -16,30 +17,23 @@ func resourceDropboxFolderMembers() *schema.Resource {
 		Delete: resourceDropboxFolderMembersDelete,
 
 		Schema: map[string]*schema.Schema{
-			"folder_id": &schema.Schema{
+			"folder_id": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateWithRegExp(folderIDPattern),
 			},
-			"members": &schema.Schema{
+			"members": {
 				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"email": &schema.Schema{
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"members.account_id"},
-							ValidateFunc:  validateWithRegExp(emailPattern),
+						"identity": {
+							Type:     schema.TypeString,
+							Required: true,
 						},
-						"account_id": &schema.Schema{
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"members.email"},
-						},
-						"access_level": &schema.Schema{
+						"access_level": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      "viewer",
@@ -48,11 +42,11 @@ func resourceDropboxFolderMembers() *schema.Resource {
 					},
 				},
 			},
-			"message": &schema.Schema{
+			"message": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"quiet": &schema.Schema{
+			"quiet": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -122,12 +116,18 @@ func resourceDropboxFolderMembersDelete(d *schema.ResourceData, meta interface{}
 }
 
 func createListOfTerraformMembers(m []*sharing.UserMembershipInfo) []map[string]string {
-	output := make([]map[string]string, 0, len(m))
+	output := make([]map[string]string, len(m))
 	for _, i := range m {
-		member := make(map[string]string)
-		member["email"] = i.User.Email
-		member["account_id"] = i.User.AccountId
-		member["access_level"] = i.AccessType.Tag
+		member := map[string]string{
+			"access_level": i.AccessType.Tag,
+		}
+
+		if i.User.Email != "" {
+			member["identity"] = i.User.Email
+		} else if i.User.AccountId != "" {
+			member["identity"] = i.User.AccountId
+		}
+
 		output = append(output, member)
 	}
 	return output
@@ -135,14 +135,18 @@ func createListOfTerraformMembers(m []*sharing.UserMembershipInfo) []map[string]
 
 func createListOfFolderMembers(m []map[string]interface{}) []*sharing.AddMember {
 	members := make([]*sharing.AddMember, 0, len(m))
+	emailRx := regexp.MustCompile(emailPattern)
+
 	for _, i := range m {
 		var selector sharing.MemberSelector
-		if email := i["email"]; email != "" {
+		identity := i["identity"].(string)
+
+		if emailRx.MatchString(identity) {
 			selector.Tag = "email"
-			selector.Email = email.(string)
+			selector.Email = identity
 		} else {
 			selector.Tag = "dropbox_id"
-			selector.DropboxId = i["account_id"].(string)
+			selector.DropboxId = identity
 		}
 
 		mem := &sharing.AddMember{
@@ -156,16 +160,17 @@ func createListOfFolderMembers(m []map[string]interface{}) []*sharing.AddMember 
 }
 
 func removeFolderShareMembers(arg *sharing.RemoveFolderMemberArg, client *sharing.Client, members []map[string]string) error {
+	emailRx := regexp.MustCompile(emailPattern)
 	for _, mem := range members {
-		if mem["email"] != "" {
+		if emailRx.MatchString(mem["identity"]) {
 			arg.Member = &sharing.MemberSelector{
 				Tagged: db.Tagged{Tag: "email"},
-				Email:  mem["email"],
+				Email:  mem["identity"],
 			}
 		} else {
 			arg.Member = &sharing.MemberSelector{
 				Tagged:    db.Tagged{Tag: "dropbox_id"},
-				DropboxId: mem["account_id"],
+				DropboxId: mem["identity"],
 			}
 		}
 		_, err := (*client).RemoveFolderMember(arg)

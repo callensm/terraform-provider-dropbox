@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDropboxPaperSharingPolicy(t *testing.T) {
@@ -13,7 +13,7 @@ func TestAccDropboxPaperSharingPolicy(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDropboxPaperSharingPolicyDataConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccPaperSharingPolicyExists("data.dropbox_paper_sharing_policy.foo"),

@@ -2,11 +2,12 @@ package dropbox
 
 import (
 	"fmt"
+	"regexp"
 
-	db "github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/paper"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/sharing"
-	"github.com/hashicorp/terraform/helper/schema"
+	db "github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/paper"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/sharing"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDropboxPaperDocUsers() *schema.Resource {
@@ -17,28 +18,21 @@ func resourceDropboxPaperDocUsers() *schema.Resource {
 		Delete: resourceDropboxPaperDocUserDelete,
 
 		Schema: map[string]*schema.Schema{
-			"doc_id": &schema.Schema{
+			"doc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"members": &schema.Schema{
+			"members": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"email": &schema.Schema{
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"members.account_id"},
-							ValidateFunc:  validateWithRegExp(emailPattern),
+						"identity": {
+							Type:     schema.TypeString,
+							Required: true,
 						},
-						"account_id": &schema.Schema{
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"members.email"},
-						},
-						"permissions": &schema.Schema{
+						"permissions": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      "view_and_comment",
@@ -48,16 +42,16 @@ func resourceDropboxPaperDocUsers() *schema.Resource {
 					},
 				},
 			},
-			"message": &schema.Schema{
+			"message": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"quiet": &schema.Schema{
+			"quiet": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"shared_users": &schema.Schema{
+			"shared_users": {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "Computed list of emails of those users invited and actively sharing the document",
@@ -145,7 +139,13 @@ func resourceDropboxPaperDocUserDelete(d *schema.ResourceData, meta interface{})
 		RefPaperDoc: *paper.NewRefPaperDoc(d.Get("doc_id").(string)),
 	}
 
-	for _, member := range createListOfMemberSelectors(d.Get("members").([]map[string]interface{})) {
+	membersList := d.Get("members").([]map[string]interface{})
+	ids := make([]string, len(membersList))
+	for i, m := range membersList {
+		ids[i] = m["identity"].(string)
+	}
+
+	for _, member := range createListOfMemberSelectors(ids) {
 		opts.Member = member
 		err := client.DocsUsersRemove(opts)
 		if err != nil {
@@ -158,14 +158,18 @@ func resourceDropboxPaperDocUserDelete(d *schema.ResourceData, meta interface{})
 
 func createListOfAddMembers(m []map[string]interface{}) []*paper.AddMember {
 	members := make([]*paper.AddMember, 0, len(m))
+	emailRx := regexp.MustCompile(emailPattern)
+
 	for _, i := range m {
 		var selector sharing.MemberSelector
-		if email := i["email"].(string); email != "" {
+		identity := i["identity"].(string)
+
+		if emailRx.MatchString(identity) {
 			selector.Tag = "email"
-			selector.Email = email
+			selector.Email = identity
 		} else {
 			selector.Tag = "dropbox_id"
-			selector.DropboxId = i["account_id"].(string)
+			selector.DropboxId = identity
 		}
 
 		mem := &paper.AddMember{

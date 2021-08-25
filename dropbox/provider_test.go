@@ -1,40 +1,35 @@
 package dropbox
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/joho/godotenv"
 )
 
-var testAccProviders map[string]terraform.ResourceProvider
+var testAccProviders map[string]*schema.Provider
 var testAccProvider *schema.Provider
 
 func init() {
-	testAccProvider = Provider().(*schema.Provider)
-	testAccProviders = map[string]terraform.ResourceProvider{
-		"dropbox": testAccProvider,
-	}
+	godotenv.Load()
 
-	token, err := ioutil.ReadFile("../token.txt")
-	if err != nil {
-		log.Fatalf("Initialization failure: Couldn't read access token file. %s", err)
-	}
-
-	err = os.Setenv("DROPBOX_TOKEN", strings.Replace(string(token), "\n", "", 1))
-	if err != nil {
+	token := os.Getenv("ACCESS_TOKEN")
+	if err := os.Setenv("DROPBOX_TOKEN", token); err != nil {
 		log.Fatalf("Initialization failure: Failed to set the DROPBOX_TOKEN env. %s", err)
 	}
 
 	log.Printf("DROPBOX_TOKEN successfully set to: %s", token)
+
+	testAccProvider = Provider()
+	testAccProviders = map[string]*schema.Provider{
+		"dropbox": testAccProvider,
+	}
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("Provider test failure: %s", err)
 	}
 }
