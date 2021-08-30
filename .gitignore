@@ -2,5 +2,4 @@
 .env
 
 bin/
-docs/
 vendor/
