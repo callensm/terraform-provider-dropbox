@@ -6,6 +6,11 @@ import (
 	"github.com/callensm/terraform-provider-dropbox/dropbox"
 )
 
+var (
+	commit  string
+	version string
+)
+
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
 func main() {
